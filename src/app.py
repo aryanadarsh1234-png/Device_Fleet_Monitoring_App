@@ -51,10 +51,22 @@ class FleetStore:
             "metrics": dev["metrics"],
         }
 
+    # NEW
+    def list(self, status=None):
+        with self._lock:
+            views = [self._view(d) for d in self._devices.values()]
+        return [v for v in views if status is None or v["status"] == status]
+
     def get(self, device_id):
         with self._lock:
             dev = self._devices.get(device_id)
             return self._view(dev) if dev else None
+
+    # NEW
+    def summary(self):
+        views = self.list()
+        online = sum(1 for v in views if v["status"] == "ONLINE")
+        return {"total": len(views), "online": online, "offline": len(views) - online}
 
 
 def _err(msg, code):
@@ -102,12 +114,27 @@ def create_app(store=None):
             return _err(f"device '{device_id}' not found", 404)
         return jsonify(store.get(device_id)), 200
 
+    # NEW
+    @app.get("/devices")
+    def list_devices():
+        status = request.args.get("status")
+        if status is not None:
+            status = status.upper()
+            if status not in ("ONLINE", "OFFLINE"):
+                return _err("status must be ONLINE or OFFLINE", 400)
+        return jsonify(store.list(status))
+
     @app.get("/devices/<device_id>")
     def get_device(device_id):
         dev = store.get(device_id)
         if dev is None:
             return _err(f"device '{device_id}' not found", 404)
         return jsonify(dev)
+
+    # NEW
+    @app.get("/summary")
+    def summary():
+        return jsonify(store.summary())
 
     return app
 
