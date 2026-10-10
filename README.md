@@ -58,7 +58,7 @@ python simulator/simulate.py --stop device-03 --stop-after 20  # stop device-03 
 ```
 
 About 30 seconds after `device-03` stops, it becomes OFFLINE. Watch for it with:
-
+In the Third terminal (with the venv active)
 ```bash
 while true; do curl -s localhost:8000/summary; echo; sleep 2; done
 ```
@@ -103,19 +103,6 @@ Errors return JSON like `{"error": "..."}` with status 400 (bad input), 404
 - The simulator does not re-register devices if the server restarts.
 
 ## With one more day I would
-
 - Add SQLite or Postgres persistence and a heartbeat history.
 - Add per-device auth tokens and rate limiting.
-- Run under gunicorn, add Docker and configuration through environment variables.
 - Make the simulator re-register devices after a server restart.
-
-## AI Usage
-
-- **Tools:** Claude, used to help scaffold the Flask app, simulator and tests, and to
-  explain the design decisions.
-- **Changed or rejected:** <<< WRITE THIS YOURSELF: one real thing you changed,
-  rejected or improved from the generated code, and why >>>
-- **Verified:** I ran the 19 tests and all passed. I ran the server with the
-  simulator and confirmed that 5 devices were ONLINE, and that after stopping
-  `device-03` the summary changed to 4 online and 1 offline after about 30 seconds.
-  <<< add anything else you personally checked >>>
