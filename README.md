@@ -34,7 +34,7 @@ In-memory storage(Python Dictionary)
 ## Build / install
 
 ```bash
-git clone <YOUR-REPO-URL>
+git clone "https://github.com/aryanadarsh1234-png/Device_Fleet_Monitoring_App.git"
 cd Device_Fleet_Monitoring_App
 python -m venv .venv
 source .venv/bin/activate
@@ -78,6 +78,7 @@ curl -X POST localhost:8000/devices -H 'Content-Type: application/json' -d '{"id
 command to make a device ONLINE:
 curl -X POST localhost:8000/devices/phone-01/heartbeat -H 'Content-Type: application/json' -d '{"status":"OK"}'
 
+Command to check Status
 curl localhost:8000/devices
 curl "localhost:8000/devices?status=online"
 curl localhost:8000/devices/device-01
