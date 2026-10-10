@@ -117,3 +117,29 @@ def test_device_recovers_after_new_heartbeat(client, clock):
 
 def test_get_unknown_device(client):
     assert client.get("/devices/nope").status_code == 404
+
+
+# --- list / summary ---
+def test_list_and_filter(client, clock):
+    register(client, "a", "A")
+    register(client, "b", "B")
+    beat(client, "a")
+    clock.advance(31)
+    beat(client, "b")
+    assert len(client.get("/devices").get_json()) == 2
+    online = client.get("/devices?status=online").get_json()
+    assert [d["id"] for d in online] == ["b"]
+    assert client.get("/devices?status=bogus").status_code == 400
+
+
+def test_summary(client, clock):
+    for i in range(3):
+        register(client, f"d{i}", f"D{i}")
+        beat(client, f"d{i}")
+    clock.advance(31)
+    beat(client, "d0")
+    assert client.get("/summary").get_json() == {"total": 3, "online": 1, "offline": 2}
+
+
+def test_summary_empty(client):
+    assert client.get("/summary").get_json() == {"total": 0, "online": 0, "offline": 0}
