@@ -89,3 +89,31 @@ def test_latest_heartbeat_wins(client, clock):
     clock.advance(10)
     beat(client)
     assert client.get("/devices/device-01").get_json()["last_heartbeat"] == "2026-09-21T10:30:10Z"
+
+
+
+# --- status / timeout ---
+def test_online_within_30s(client, clock):
+    register(client)
+    beat(client)
+    clock.advance(30)
+    assert client.get("/devices/device-01").get_json()["status"] == "ONLINE"
+
+
+def test_offline_after_30s(client, clock):
+    register(client)
+    beat(client)
+    clock.advance(31)
+    assert client.get("/devices/device-01").get_json()["status"] == "OFFLINE"
+
+
+def test_device_recovers_after_new_heartbeat(client, clock):
+    register(client)
+    beat(client)
+    clock.advance(60)
+    beat(client)
+    assert client.get("/devices/device-01").get_json()["status"] == "ONLINE"
+
+
+def test_get_unknown_device(client):
+    assert client.get("/devices/nope").status_code == 404
